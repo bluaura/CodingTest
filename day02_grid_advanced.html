@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[2일차] 2차원 배열 회전 & 8방향 탐색 & itertools 완전탐색</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Noto+Sans+KR:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.15);
+            --accent: #818cf8;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --code-bg: #0f172a;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(90deg, #10b981, #38bdf8);
+            color: #0f172a;
+            font-weight: 700;
+            padding: 0.35rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 1.2rem;
+            border-bottom: 2px solid rgba(56, 189, 248, 0.2);
+            padding-bottom: 0.6rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #e2e8f0;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+
+        li {
+            margin-bottom: 0.4rem;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background-color: rgba(56, 189, 248, 0.1);
+            color: #38bdf8;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 1.25rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: #f1f5f9;
+            line-height: 1.6;
+        }
+
+        .comment { color: #64748b; }
+        .keyword { color: #f472b6; font-weight: 600; }
+        .function { color: #38bdf8; }
+        .string { color: #34d399; }
+        .number { color: #fbbf24; }
+
+        .callout {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--success-color);
+            padding: 1rem 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.2rem 0;
+        }
+
+        .matrix-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .matrix-box {
+            background: #0f172a;
+            border: 1px solid #475569;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .matrix-title {
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .matrix-grid {
+            display: grid;
+            gap: 4px;
+        }
+
+        .m-cell {
+            width: 38px;
+            height: 38px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Fira Code', monospace;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .arrow {
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--card-border);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <span class="badge">DAY 02 • 파이썬 시뮬레이션 심화</span>
+            <h1>2일차: 2차원 배열 회전 & 8방향 탐색 & 조합/순열</h1>
+            <p class="subtitle">LG SW 역량 인증 빈출 시뮬레이션 및 완전탐색 핵심 테크닉</p>
+        </header>
+
+        <!-- 1. 2차원 배열 90도 회전 공식 -->
+        <section class="card">
+            <h2 class="card-title">🔄 1. 2차원 배열 90도 시계방향 회전 공식</h2>
+            <p>삼성, LG, 카카오 등 코딩 테스트의 시뮬레이션 문제에서 가장 많이 나오는 <strong>2차원 배열 회전 공식</strong>입니다.</p>
+            
+            <div class="matrix-container">
+                <div class="matrix-box">
+                    <div class="matrix-title">원래 행렬 (2 x 3)</div>
+                    <div class="matrix-grid" style="grid-template-columns: repeat(3, 38px);">
+                        <div class="m-cell">1</div><div class="m-cell">2</div><div class="m-cell">3</div>
+                        <div class="m-cell">4</div><div class="m-cell">5</div><div class="m-cell">6</div>
+                    </div>
+                </div>
+                <div class="arrow">➔ 90° 회전 ➔</div>
+                <div class="matrix-box">
+                    <div class="matrix-title">회전 후 행렬 (3 x 2)</div>
+                    <div class="matrix-grid" style="grid-template-columns: repeat(2, 38px);">
+                        <div class="m-cell">4</div><div class="m-cell">1</div>
+                        <div class="m-cell">5</div><div class="m-cell">2</div>
+                        <div class="m-cell">6</div><div class="m-cell">3</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout">
+                <strong>💡 회전 좌표 변환 공식 (N x M 행렬 기준)</strong>
+                <p style="margin-top: 0.5rem; margin-bottom: 0;">
+                    원래 행렬의 <code>(r, c)</code> 위치에 있던 요소는 90도 시계방향 회전 후 <code>(c, N - 1 - r)</code> 위치로 이동합니다.
+                </p>
+            </div>
+
+            <pre><code><span class="comment"># 90도 시계방향 회전 정석 표준 코드</span>
+<span class="keyword">def</span> <span class="function">rotate_90_clockwise</span>(matrix):
+    N = <span class="function">len</span>(matrix)     <span class="comment"># 원래 행 개수</span>
+    M = <span class="function">len</span>(matrix[<span class="number">0</span>])  <span class="comment"># 원래 열 개수</span>
+    
+    <span class="comment"># 회전 후 행렬 크기는 M x N 이 됨</span>
+    rotated = [[<span class="number">0</span>] * N <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(M)]
+    
+    <span class="keyword">for</span> r <span class="keyword">in</span> <span class="function">range</span>(N):
+        <span class="keyword">for</span> c <span class="keyword">in</span> <span class="function">range</span>(M):
+            rotated[c][N - <span class="number">1</span> - r] = matrix[r][c]
+            
+    <span class="keyword">return</span> rotated
+
+<span class="comment"># 🐍 파이썬 1줄 팁 (zip과 리스트 슬라이싱 활용)</span>
+rotated_pythonic = [<span class="function">list</span>(row) <span class="keyword">for</span> row <span class="keyword">in</span> <span class="function">zip</span>(*matrix[::-<span class="number">1</span>])]</code></pre>
+        </section>
+
+        <!-- 2. 8방향 벡터 탐색 -->
+        <section class="card">
+            <h2 class="card-title">🧭 2. 8방향 벡터 탐색 (상, 하, 좌, 우 + 대각선 4개)</h2>
+            <p>지뢰 찾기, 체스 나이트 이동, 대각선 인접 요소 탐색에 사용되는 8방향 벡터입니다.</p>
+
+            <pre><code><span class="comment"># 8방향: 상, 하, 좌, 우, 좌상, 우상, 좌하, 우하</span>
+dr = [-<span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, -<span class="number">1</span>, -<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>]
+dc = [<span class="number">0</span>, <span class="number">0</span>, -<span class="number">1</span>, <span class="number">1</span>, -<span class="number">1</span>, <span class="number">1</span>, -<span class="number">1</span>, <span class="number">1</span>]
+
+<span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">8</span>):
+    nr = r + dr[i]
+    nc = c + dc[i]
+    <span class="keyword">if</span> <span class="number">0</span> &lt;= nr &lt; N <span class="keyword">and</span> <span class="number">0</span> &lt;= nc &lt; M:
+        <span class="comment"># 인접 8방향 요소 접근</span>
+        <span class="function">print</span>(grid[nr][nc])</code></pre>
+        </section>
+
+        <!-- 3. itertools 순열과 조합 -->
+        <section class="card">
+            <h2 class="card-title">🎲 3. 완전 탐색을 위한 itertools (조합 & 순열)</h2>
+            <p>완전 탐색(Brute Force) 문제에서 후보군을 선택할 때 파이썬 내장 라이브러리를 사용하면 손쉽게 조합과 순열을 구할 수 있습니다.</p>
+
+            <pre><code><span class="keyword">from</span> itertools <span class="keyword">import</span> combinations, permutations
+
+data = [<span class="string">'A'</span>, <span class="string">'B'</span>, <span class="string">'C'</span>, <span class="string">'D'</span>]
+
+<span class="comment"># 1) 조합 (combinations): 순서 상관없이 N개 중 K개 선택 (nCk)</span>
+comb = <span class="function">list</span>(combinations(data, <span class="number">2</span>))
+<span class="comment"># [('A', 'B'), ('A', 'C'), ('A', 'D'), ('B', 'C'), ('B', 'D'), ('C', 'D')]</span>
+
+<span class="comment"># 2) 순열 (permutations): 순서를 고려하여 N개 중 K개 선택 (nPk)</span>
+perm = <span class="function">list</span>(permutations(data, <span class="number">2</span>))
+<span class="comment"># [('A', 'B'), ('A', 'C'), ('A', 'D'), ('B', 'A'), ('B', 'C'), ... ]</span></code></pre>
+        </section>
+
+        <!-- 4. 2일차 실습 문제 해설 -->
+        <section class="card">
+            <h2 class="card-title">📝 4. [실습 문제 2] 지뢰 탐지기 & 90도 회전 시뮬레이션</h2>
+            <p><strong>문제</strong>: N x N 지도를 90도 시계방향으로 회전시킨 후, 지뢰가 없는 빈칸(0)에 대해 인접 8방향 지뢰(1)의 개수를 카운트하여 반환하세요.</p>
+
+            <pre><code><span class="keyword">def</span> <span class="function">solution</span>(N, grid):
+    <span class="comment"># 1. 2차원 배열 90도 시계방향 회전</span>
+    rotated_grid = [[<span class="number">0</span>] * N <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(N)]
+    <span class="keyword">for</span> r <span class="keyword">in</span> <span class="function">range</span>(N):
+        <span class="keyword">for</span> c <span class="keyword">in</span> <span class="function">range</span>(N):
+            rotated_grid[c][N - <span class="number">1</span> - r] = grid[r][c]
+            
+    <span class="comment"># 2. 8방향 벡터 정의</span>
+    dr = [-<span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, -<span class="number">1</span>, -<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>]
+    dc = [<span class="number">0</span>, <span class="number">0</span>, -<span class="number">1</span>, <span class="number">1</span>, -<span class="number">1</span>, <span class="number">1</span>, -<span class="number">1</span>, <span class="number">1</span>]
+    
+    result_grid = [[<span class="number">0</span>] * N <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(N)]
+    
+    <span class="keyword">for</span> r <span class="keyword">in</span> <span class="function">range</span>(N):
+        <span class="keyword">for</span> c <span class="keyword">in</span> <span class="function">range</span>(N):
+            <span class="keyword">if</span> rotated_grid[r][c] == <span class="number">1</span>:
+                result_grid[r][c] = -<span class="number">1</span>  <span class="comment"># 지뢰 위치 표기</span>
+            <span class="keyword">else</span>:
+                mine_count = <span class="number">0</span>
+                <span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">8</span>):
+                    nr, nc = r + dr[i], c + dc[i]
+                    <span class="keyword">if</span> <span class="number">0</span> &lt;= nr &lt; N <span class="keyword">and</span> <span class="number">0</span> &lt;= nc &lt; N:
+                        <span class="keyword">if</span> rotated_grid[nr][nc] == <span class="number">1</span>:
+                            mine_count += <span class="number">1</span>
+                result_grid[r][c] = mine_count
+                
+    <span class="keyword">return</span> result_grid</code></pre>
+        </section>
+
+        <footer>
+            <p>Antigravity Python Coding Test Preparation Guide • Day 02</p>
+        </footer>
+    </div>
+</body>
+</html>

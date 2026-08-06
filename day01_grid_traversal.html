@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[1일차] 파이썬 코테 보일러플레이트 & 2차원 격자 탐색 (dx, dy) 핵심 원리</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Noto+Sans+KR:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.15);
+            --accent: #4f46e5;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --code-bg: #0f172a;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(90deg, #38bdf8, #818cf8);
+            color: #0f172a;
+            font-weight: 700;
+            padding: 0.35rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 1.2rem;
+            border-bottom: 2px solid rgba(56, 189, 248, 0.2);
+            padding-bottom: 0.6rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #e2e8f0;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+
+        li {
+            margin-bottom: 0.4rem;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background-color: rgba(56, 189, 248, 0.1);
+            color: #38bdf8;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 1.25rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: #f1f5f9;
+            line-height: 1.6;
+        }
+
+        .comment { color: #64748b; }
+        .keyword { color: #f472b6; font-weight: 600; }
+        .function { color: #38bdf8; }
+        .string { color: #34d399; }
+        .number { color: #fbbf24; }
+
+        .callout {
+            background-color: rgba(79, 70, 229, 0.1);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.2rem 0;
+        }
+
+        .callout-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .grid-visual {
+            display: grid;
+            grid-template-columns: repeat(3, 70px);
+            gap: 6px;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+
+        .grid-cell {
+            width: 70px;
+            height: 70px;
+            background-color: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .grid-cell.active {
+            background-color: var(--primary-glow);
+            border-color: var(--primary);
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .grid-cell.obstacle {
+            background-color: rgba(239, 68, 68, 0.15);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--card-border);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <span class="badge">DAY 01 • 파이썬 코테 기초</span>
+            <h1>1일차: 코테 필수 보일러플레이트 & 2차원 격자 탐색</h1>
+            <p class="subtitle">LG SW 역량 인증 및 코딩 테스트 대비 2개월 정복 로드맵</p>
+        </header>
+
+        <!-- 1. 코테 필수 보일러플레이트 -->
+        <section class="card">
+            <h2 class="card-title">⚙️ 1. 파이썬 코테 필수 보일러플레이트 (Template)</h2>
+            <p>파이썬으로 코딩 테스트(특히 백준/LG 역량 평가)를 진행할 때 코드 최상단에 반드시 작성해야 하는 2가지 기본 설정입니다.</p>
+            
+            <pre><code><span class="keyword">import</span> sys
+<span class="keyword">from</span> collections <span class="keyword">import</span> deque
+
+<span class="comment"># 1. 빠른 입출력 설정 (input() 대비 약 5~10배 속도 향상)</span>
+input = sys.stdin.readline
+
+<span class="comment"># 2. 재귀 깊이 제한 해제 (기본 1,000회 ➔ 100,000회~1,000,000회로 확장)</span>
+sys.setrecursionlimit(<span class="number">10</span>**<span class="number">6</span>)</code></pre>
+
+            <div class="callout callout-warning">
+                <strong>❓ Q&A: 재귀 깊이를 해제하면 메모리 초과가 나지 않나요?</strong>
+                <p style="margin-top: 0.5rem; margin-bottom: 0;">
+                    <strong>네, 맞습니다.</strong> 무한 재귀 버그가 생기면 메모리 초과가 발생할 수 있습니다. 
+                    하지만 백준/LG 시험의 깊은 DFS 문제(노드가 10만 개 연결된 일자형 그래프 등)에서는 정답 코드임에도 기본 제한(1,000회) 때문에 <code>RecursionError</code>가 날 수 있습니다.
+                    파이썬에서 10만 번 호출 스택 메모리는 약 10~30MB 수준으로 보통 메모리 제한(128~512MB) 내에서 안전하므로 필수 설정입니다.
+                </p>
+            </div>
+        </section>
+
+        <!-- 2. 2차원 격자 탐색 원리 -->
+        <section class="card">
+            <h2 class="card-title">🧭 2. 2차원 격자 탐색 (방향 벡터 dr, dc) 원리</h2>
+            <p>코딩 테스트 시뮬레이션 및 DFS/BFS 문제의 30% 이상을 차지하는 격자(Grid) 탐색 핵심 개념입니다.</p>
+            
+            <p>2차원 배열은 <code>grid[r][c]</code> 형태를 취하며, <code>r</code>은 행(세로/위아래), <code>c</code>는 열(가로/좌우)을 의미합니다.</p>
+
+            <div class="grid-visual">
+                <div class="grid-cell">(0,0)</div>
+                <div class="grid-cell">(0,1)</div>
+                <div class="grid-cell obstacle">(0,2) 벽</div>
+                <div class="grid-cell active">현재(1,0)</div>
+                <div class="grid-cell obstacle">(1,1) 벽</div>
+                <div class="grid-cell">(1,2)</div>
+                <div class="grid-cell">(2,0)</div>
+                <div class="grid-cell">(2,1)</div>
+                <div class="grid-cell">(2,2)</div>
+            </div>
+
+            <pre><code><span class="comment"># 상(-1,0), 하(1,0), 좌(0,-1), 우(0,1) 방향 벡터</span>
+dr = [-<span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>]
+dc = [<span class="number">0</span>, <span class="number">0</span>, -<span class="number">1</span>, <span class="number">1</span>]
+
+<span class="comment"># 현재 위치 (r, c) 기준 4방향 이동 예상</span>
+<span class="keyword">for</span> i <span class="keyword">in</span> <span class="function">range</span>(<span class="number">4</span>):
+    nr = r + dr[i]  <span class="comment"># Next Row</span>
+    nc = c + dc[i]  <span class="comment"># Next Column</span>
+
+    <span class="comment"># ★ 핵심: 격자 경계(Boundary Check) 검사</span>
+    <span class="keyword">if</span> <span class="number">0</span> &lt;= nr &lt; N <span class="keyword">and</span> <span class="number">0</span> &lt;= nc &lt; M:
+        <span class="comment"># 이동 가능한 격자 내부인 경우만 탐색 진행</span>
+        <span class="function">print</span>(f<span class="string">"유효한 이동: ({nr}, {nc})"</span>)</code></pre>
+        </section>
+
+        <!-- 3. 실습 문제 및 소스코드 -->
+        <section class="card">
+            <h2 class="card-title">📝 3. [실습 문제 1] 상하좌우 로봇 이동 시뮬레이션</h2>
+            <p><strong>문제</strong>: N x N 격자의 (0,0)에서 출발하여 명령 문자열('U','D','L','R')에 따라 이동하되, 격자 밖으로 벗어나는 명령은 무시하고 최종 위치를 구하세요.</p>
+            
+            <pre><code><span class="keyword">def</span> <span class="function">solution</span>(N, commands):
+    <span class="comment"># 현재 위치 (0, 0) 초기화</span>
+    r, c = <span class="number">0</span>, <span class="number">0</span>
+    
+    <span class="comment"># 딕셔너리를 활용한 가독성 높은 방향 벡터 매핑</span>
+    move_dir = {
+        <span class="string">'U'</span>: (-<span class="number">1</span>, <span class="number">0</span>),  <span class="comment"># 위 (행 -1)</span>
+        <span class="string">'D'</span>: (<span class="number">1</span>, <span class="number">0</span>),   <span class="comment"># 아래 (행 +1)</span>
+        <span class="string">'L'</span>: (<span class="number">0</span>, -<span class="number">1</span>),  <span class="comment"># 왼쪽 (열 -1)</span>
+        <span class="string">'R'</span>: (<span class="number">0</span>, <span class="number">1</span>)    <span class="comment"># 오른쪽 (열 +1)</span>
+    }
+    
+    <span class="keyword">for</span> cmd <span class="keyword">in</span> commands:
+        dr, dc = move_dir[cmd]
+        nr = r + dr
+        nc = c + dc
+        
+        <span class="comment"># 격자 경계 검사: 범위 안에 있을 때만 위치 갱신</span>
+        <span class="keyword">if</span> <span class="number">0</span> &lt;= nr &lt; N <span class="keyword">and</span> <span class="number">0</span> &lt;= nc &lt; N:
+            r, c = nr, nc
+            
+    <span class="keyword">return</span> r, c
+
+<span class="comment"># 테스트 예시</span>
+<span class="function">print</span>(solution(<span class="number">5</span>, <span class="string">"RRDDLU"</span>))  <span class="comment"># 출력: (1, 1)</span></code></pre>
+        </section>
+
+        <footer>
+            <p>Antigravity Python Coding Test Preparation Guide • Day 01</p>
+        </footer>
+    </div>
+</body>
+</html>
