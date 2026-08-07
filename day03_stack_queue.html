@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[3일차] 필수 자료구조 - 스택(Stack), 큐(Queue), 덱(Deque) 원리</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Noto+Sans+KR:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.15);
+            --accent: #a855f7;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --code-bg: #0f172a;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(90deg, #a855f7, #38bdf8);
+            color: #ffffff;
+            font-weight: 700;
+            padding: 0.35rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 1.2rem;
+            border-bottom: 2px solid rgba(56, 189, 248, 0.2);
+            padding-bottom: 0.6rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #e2e8f0;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background-color: rgba(56, 189, 248, 0.1);
+            color: #38bdf8;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 1.25rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: #f1f5f9;
+            line-height: 1.6;
+        }
+
+        .comment { color: #64748b; }
+        .keyword { color: #f472b6; font-weight: 600; }
+        .function { color: #38bdf8; }
+        .string { color: #34d399; }
+        .number { color: #fbbf24; }
+
+        .callout-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning-color);
+            padding: 1rem 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.2rem 0;
+        }
+
+        .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .table-custom th, .table-custom td {
+            border: 1px solid #334155;
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+
+        .table-custom th {
+            background-color: #0f172a;
+            color: var(--primary);
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--card-border);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <span class="badge">DAY 03 • 필수 알고리즘 자료구조</span>
+            <h1>3일차: 스택(Stack), 큐(Queue), 덱(Deque) 정복</h1>
+            <p class="subtitle">시간 복잡도 O(1)의 덱 활용법과 프로세스 스케줄링 시뮬레이션</p>
+        </header>
+
+        <!-- 1. 스택 원리 및 괄호 검사 -->
+        <section class="card">
+            <h2 class="card-title">📚 1. 스택 (Stack, LIFO - 후입선출)</h2>
+            <p>나중에 들어온 데이터가 먼저 나가는 구조입니다. 파이썬에서는 기본 <code>list</code>의 <code>append()</code>와 <code>pop()</code>으로 완벽히 작동합니다.</p>
+            
+            <pre><code><span class="comment"># 괄호 짝 맞추기 (스택 대표 문제 패턴)</span>
+<span class="keyword">def</span> <span class="function">is_valid_parentheses</span>(s):
+    stack = []
+    bracket_map = {<span class="string">')'</span>: <span class="string">'('</span>, <span class="string">'}'</span>: <span class="string">'{'</span>, <span class="string">']'</span>: <span class="string">'['</span>}
+    
+    <span class="keyword">for</span> char <span class="keyword">in</span> s:
+        <span class="keyword">if</span> char <span class="keyword">in</span> <span class="string">"({["</span>:
+            stack.append(char)
+        <span class="keyword">elif</span> char <span class="keyword">in</span> <span class="string">")}]"</span>:
+            <span class="keyword">if</span> <span class="keyword">not</span> stack <span class="keyword">or</span> stack[-<span class="number">1</span>] != bracket_map[char]:
+                <span class="keyword">return</span> <span class="keyword">False</span>
+            stack.pop()
+            
+    <span class="keyword">return</span> <span class="function">len</span>(stack) == <span class="number">0</span></code></pre>
+        </section>
+
+        <!-- 2. 큐 vs 덱 차이점 -->
+        <section class="card">
+            <h2 class="card-title">⚡ 2. 큐 (Queue, FIFO) vs 덱 (Deque) 및 시간복잡도</h2>
+            
+            <div class="callout-warning">
+                <strong>⚠️ 주의: 코테에서 list.pop(0) 절대 금지!</strong>
+                <p style="margin-top: 0.5rem; margin-bottom: 0;">
+                    파이썬 <code>list.pop(0)</code>은 첫 요소를 삭제한 뒤 남은 $N$개의 요소를 모두 한 칸씩 앞으로 당기기 때문에 <strong>$O(N)$ 시간</strong>이 소요되어 시간 초과가 발생합니다.<br>
+                    반면 <code>collections.deque.popleft()</code>는 <strong>$O(1)$ 시간</strong>에 처리됩니다.
+                </p>
+            </div>
+
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>구분</th>
+                        <th>파이썬 list.pop(0)</th>
+                        <th>collections.deque.popleft()</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>시간 복잡도</strong></td>
+                        <td><span style="color: #ef4444; font-weight: bold;">O(N)</span> (10만 개 탐색 시 ~0.5초)</td>
+                        <td><span style="color: #10b981; font-weight: bold;">O(1)</span> (10만 개 탐색 시 ~0.003초)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>내부 구조</strong></td>
+                        <td>동적 배열 (Array)</td>
+                        <td>이중 연결 리스트 (Doubly Linked List)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <pre><code><span class="keyword">from</span> collections <span class="keyword">import</span> deque
+
+dq = deque([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>])
+
+<span class="comment"># 1. 양방향 데이터 입출력 (O(1))</span>
+dq.append(<span class="number">6</span>)       <span class="comment"># 오른쪽 추가</span>
+dq.appendleft(<span class="number">0</span>)   <span class="comment"># 왼쪽 추가</span>
+dq.pop()           <span class="comment"># 오른쪽 제거</span>
+dq.popleft()       <span class="comment"># 왼쪽 제거</span>
+
+<span class="comment"># 2. 덱 회전 (rotate)</span>
+dq.rotate(<span class="number">2</span>)   <span class="comment"># 오른쪽 2칸 회전</span>
+dq.rotate(-<span class="number">2</span>)  <span class="comment"># 왼쪽 2칸 회전</span></code></pre>
+        </section>
+
+        <!-- 3. 3일차 실습 문제 -->
+        <section class="card">
+            <h2 class="card-title">📝 3. [실습 문제 3] 큐 기반 프로세스 스케줄링 시뮬레이션</h2>
+            <p><strong>문제</strong>: 프로세스 우선순위 큐에서 가장 앞의 프로세스를 꺼내어 남아있는 큐에 더 높은 우선순위가 있으면 맨 뒤로 보냅니다. 지정된 location의 프로세스가 몇 번째로 실행되는지 구하세요.</p>
+
+            <pre><code><span class="keyword">from</span> collections <span class="keyword">import</span> deque
+
+<span class="keyword">def</span> <span class="function">solution</span>(priorities, location):
+    <span class="comment"># (우선순위, 원래인덱스) 튜플을 큐에 저장</span>
+    queue = deque([(priority, i) <span class="keyword">for</span> i, priority <span class="keyword">in</span> <span class="function">enumerate</span>(priorities)])
+    execution_order = <span class="number">0</span>
+    
+    <span class="keyword">while</span> queue:
+        current = queue.popleft()
+        
+        <span class="comment"># 남아있는 큐에 더 높은 우선순위가 있는지 검사</span>
+        <span class="keyword">if</span> <span class="function">any</span>(current[<span class="number">0</span>] &lt; item[<span class="number">0</span>] <span class="keyword">for</span> item <span class="keyword">in</span> queue):
+            queue.append(current)  <span class="comment"># 뒤로 회전</span>
+        <span class="keyword">else</span>:
+            execution_order += <span class="number">1</span>
+            <span class="keyword">if</span> current[<span class="number">1</span>] == location:
+                <span class="keyword">return</span> execution_order</code></pre>
+        </section>
+
+        <footer>
+            <p>Antigravity Python Coding Test Preparation Guide • Day 03</p>
+        </footer>
+    </div>
+</body>
+</html>
