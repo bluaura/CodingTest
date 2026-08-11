@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[4일차] 해시(Hash Table) & 다중 정렬(Multi-key Sorting) 원리</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Noto+Sans+KR:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.15);
+            --accent: #ec4899;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --code-bg: #0f172a;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(90deg, #ec4899, #38bdf8);
+            color: #ffffff;
+            font-weight: 700;
+            padding: 0.35rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 1.2rem;
+            border-bottom: 2px solid rgba(56, 189, 248, 0.2);
+            padding-bottom: 0.6rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #e2e8f0;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background-color: rgba(56, 189, 248, 0.1);
+            color: #38bdf8;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 1.25rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: #f1f5f9;
+            line-height: 1.6;
+        }
+
+        .comment { color: #64748b; }
+        .keyword { color: #f472b6; font-weight: 600; }
+        .function { color: #38bdf8; }
+        .string { color: #34d399; }
+        .number { color: #fbbf24; }
+
+        .callout {
+            background-color: rgba(236, 72, 153, 0.1);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.2rem 0;
+        }
+
+        .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .table-custom th, .table-custom td {
+            border: 1px solid #334155;
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+
+        .table-custom th {
+            background-color: #0f172a;
+            color: var(--primary);
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--card-border);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <span class="badge">DAY 04 • 필수 알고리즘 자료구조</span>
+            <h1>4일차: 해시(Hash Table) & 다중 정렬 패턴</h1>
+            <p class="subtitle">O(1) 탐색 성능의 파이썬 dict/set 과 lambda 기반 람다 정렬</p>
+        </header>
+
+        <!-- 1. 해시 탐색 성능 -->
+        <section class="card">
+            <h2 class="card-title">🔑 1. 해시 탐색 (dict & set) vs 리스트 탐색</h2>
+            <p>파이썬의 <code>dict</code>와 <code>set</code>은 내부적으로 **해시 테이블(Hash Table)**을 사용하여 탐색 시간이 평균 <strong>$O(1)$</strong>입니다.</p>
+
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>구문</th>
+                        <th>자료구조</th>
+                        <th>시간 복잡도</th>
+                        <th>특징</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>item in list</code></td>
+                        <td>리스트 (List)</td>
+                        <td><span style="color: #ef4444; font-weight: bold;">O(N)</span></td>
+                        <td>맨 처음부터 끝까지 순차 탐색 (10만 개 탐색 시 시간초과 위험)</td>
+                    </tr>
+                    <tr>
+                        <td><code>item in set</code> 또는 <code>key in dict</code></td>
+                        <td>집합/딕셔너리</td>
+                        <td><span style="color: #10b981; font-weight: bold;">O(1)</span></td>
+                        <td>해시 함수를 통해 즉시 주소로 접근 (데이터 양과 무관하게 순간 탐색)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 2. collections 꿀팁 -->
+        <section class="card">
+            <h2 class="card-title">🛠️ 2. collections (defaultdict & Counter)</h2>
+            
+            <pre><code><span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict, Counter
+
+<span class="comment"># 1) defaultdict: KeyError 예방 및 자동 초기화</span>
+scores = defaultdict(<span class="function">int</span>)
+scores[<span class="string">'classic'</span>] += <span class="number">500</span>  <span class="comment"># 키가 없어도 자동으로 0으로 생성 후 500 더함</span>
+
+song_list = defaultdict(<span class="function">list</span>)
+song_list[<span class="string">'pop'</span>].append((<span class="number">600</span>, <span class="number">1</span>))  <span class="comment"># 키가 없어도 빈 리스트 [] 생성 후 append</span>
+
+<span class="comment"># 2) Counter: 요소의 빈도수 측정</span>
+counts = Counter([<span class="string">'apple'</span>, <span class="string">'banana'</span>, <span class="string">'apple'</span>])
+<span class="function">print</span>(counts.most_common(<span class="number">1</span>))  <span class="comment"># [('apple', 2)] 가장 많이 등장한 요소 추출</span></code></pre>
+        </section>
+
+        <!-- 3. 다중 조건 정렬 -->
+        <section class="card">
+            <h2 class="card-title">📊 3. 다중 조건 정렬 (sort with key=lambda)</h2>
+            <p>여러 정렬 조건(1순위, 2순위, 3순위)이 주어지는 코딩 테스트 문제에서 필수적인 람다(lambda) 정렬 기법입니다.</p>
+
+            <pre><code>students = [(<span class="string">"Jun"</span>, <span class="number">90</span>, <span class="number">80</span>), (<span class="string">"Min"</span>, <span class="number">90</span>, <span class="number">95</span>), (<span class="string">"Kim"</span>, <span class="number">80</span>, <span class="number">100</span>)]
+
+<span class="comment"># 정렬 튜플 (-국어점수, -영어점수, 이름오름차순)</span>
+<span class="comment"># 숫자 앞에 마이너스(-)를 붙이면 내림차순 정렬이 됩니다!</span>
+students.sort(key=<span class="keyword">lambda</span> x: (-x[<span class="number">1</span>], -x[<span class="number">2</span>], x[<span class="number">0</span>]))</code></pre>
+        </section>
+
+        <!-- 4. 4일차 실습 문제 -->
+        <section class="card">
+            <h2 class="card-title">📝 4. [실습 문제 4] 장르별 베스트앨범 고르기</h2>
+            <p><strong>문제</strong>: 장르별 총 재생 횟수 기준 내림차순 ➔ 장르 내에서는 재생 횟수 내림차순 ➔ 재생 횟수가 같으면 고유 번호 오름차순으로 최대 2개씩 수집하세요.</p>
+
+            <pre><code><span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict
+
+<span class="keyword">def</span> <span class="function">solution</span>(genres, plays):
+    total_plays = defaultdict(<span class="function">int</span>)
+    genre_songs = defaultdict(<span class="function">list</span>)
+    
+    <span class="keyword">for</span> i, (g, p) <span class="keyword">in</span> <span class="function">enumerate</span>(<span class="function">zip</span>(genres, plays)):
+        total_plays[g] += p
+        genre_songs[g].append((p, i))
+        
+    <span class="comment"># 1. 장르별 총 재생 횟수 내림차순 정렬</span>
+    sorted_genres = <span class="function">sorted</span>(total_plays.keys(), key=<span class="keyword">lambda</span> g: total_plays[g], reverse=<span class="keyword">True</span>)
+    result = []
+    
+    <span class="keyword">for</span> g <span class="keyword">in</span> sorted_genres:
+        songs = genre_songs[g]
+        <span class="comment"># 2. 재생 횟수 내림차순(-x[0]), 고유 번호 오름차순(x[1])</span>
+        songs.sort(key=<span class="keyword">lambda</span> x: (-x[<span class="number">0</span>], x[<span class="number">1</span>]))
+        
+        <span class="keyword">for</span> p_cnt, song_id <span class="keyword">in</span> songs[:<span class="number">2</span>]:
+            result.append(song_id)
+            
+    <span class="keyword">return</span> result</code></pre>
+        </section>
+
+        <footer>
+            <p>Antigravity Python Coding Test Preparation Guide • Day 04</p>
+        </footer>
+    </div>
+</body>
+</html>
