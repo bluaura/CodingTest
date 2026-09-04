@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[7일차] 투 포인터(Two Pointers) & 슬라이딩 윈도우 & 1주차 총정리</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Noto+Sans+KR:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.15);
+            --accent: #6366f1;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --code-bg: #0f172a;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(90deg, #6366f1, #38bdf8);
+            color: #ffffff;
+            font-weight: 700;
+            padding: 0.35rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 1.2rem;
+            border-bottom: 2px solid rgba(56, 189, 248, 0.2);
+            padding-bottom: 0.6rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #e2e8f0;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background-color: rgba(56, 189, 248, 0.1);
+            color: #38bdf8;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 1.25rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: #f1f5f9;
+            line-height: 1.6;
+        }
+
+        .comment { color: #64748b; }
+        .keyword { color: #f472b6; font-weight: 600; }
+        .function { color: #38bdf8; }
+        .string { color: #34d399; }
+        .number { color: #fbbf24; }
+
+        .callout {
+            background-color: rgba(99, 102, 241, 0.1);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.2rem 0;
+        }
+
+        .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .table-custom th, .table-custom td {
+            border: 1px solid #334155;
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+
+        .table-custom th {
+            background-color: #0f172a;
+            color: var(--primary);
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--card-border);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <span class="badge">DAY 07 • 1주차 총정리 & 투 포인터</span>
+            <h1>7일차: 투 포인터, 슬라이딩 윈도우 & 1주차 마스터</h1>
+            <p class="subtitle">O(N^2) 이중 반복문을 O(N)으로 단축시키는 투 포인터 테크닉과 1주차 핵심 가이드</p>
+        </header>
+
+        <!-- 1. 투 포인터 원리 -->
+        <section class="card">
+            <h2 class="card-title">👉 1. 투 포인터 (Two Pointers) 핵심 원리</h2>
+            <p>1차원 배열에서 **두 개의 포인터(인덱스)** 위치를 조건에 따라 조작하며 <strong>$O(N)$ 시간</strong>에 문제를 해결하는 기법입니다.</p>
+
+            <div class="callout">
+                <strong>동일 방향 투 포인터 (start, end) 동작 알고리즘</strong>
+                <ol style="margin-left: 1.2rem; margin-top: 0.5rem;">
+                    <code>current_sum &lt; k</code> 이면: <code>end += 1</code> (합을 키우기 위해 오른쪽으로 확장)</li>
+                    <code>current_sum &gt;= k</code> 이면: <code>start += 1</code> (합을 줄이거나 다음 구간을 위해 왼쪽을 축소)</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- 2. 1주차 7일간 완주 요약표 -->
+        <section class="card">
+            <h2 class="card-title">🏆 2. 1주차 데이터 구조 & 알고리즘 선택 요약 가이드</h2>
+            
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>일차</th>
+                        <th>알고리즘 / 자료구조</th>
+                        <th>대표 활용 상황</th>
+                        <th>시간 복잡도</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1일차</strong></td>
+                        <td>2차원 격자 탐색 (dr, dc)</td>
+                        <td>상하좌우 미로/지도 이동, 방향 시뮬레이션</td>
+                        <td>$O(N \times M)$</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2일차</strong></td>
+                        <td>배열 회전 & itertools</td>
+                        <td>90도 행렬 회전, 완전탐색 조합/순열</td>
+                        <td>$O(N^2)$, $O(_nC_k)$</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3일차</strong></td>
+                        <td>스택 & 덱 (deque)</td>
+                        <td>괄호 짝 맞추기, 프로세스 큐 회전시뮬레이션</td>
+                        <td><span style="color: #10b981; font-weight: bold;">$O(1)$ (popleft)</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>4일차</strong></td>
+                        <td>해시(dict/set) & 람다정렬</td>
+                        <td>빠른 요소 존재 검사, 장르/다중 조건 정렬</td>
+                        <td><span style="color: #10b981; font-weight: bold;">$O(1)$ 탐색</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>5일차</strong></td>
+                        <td>우선순위 큐 (heapq)</td>
+                        <td>최솟값/최댓값 실시간 유지 및 믹싱</td>
+                        <td><span style="color: #10b981; font-weight: bold;">$O(\log N)$</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>6일차</strong></td>
+                        <td>이진탐색 & 매개변수탐색</td>
+                        <td>정렬된 배열 빠른 탐색, 조건 만족 최댓값 $H$</td>
+                        <td><span style="color: #10b981; font-weight: bold;">$O(\log N)$</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>7일차</strong></td>
+                        <td>투 포인터 & 슬라이딩 윈도우</td>
+                        <td>연속 부분 수열 합, 두 수의 합, 구간 최댓값</td>
+                        <td><span style="color: #10b981; font-weight: bold;">$O(N)$</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 3. 7일차 실습 문제 -->
+        <section class="card">
+            <h2 class="card-title">📝 3. [실습 문제 7] 연속된 부분 수열의 합 (프로그래머스 Lv.2)</h2>
+            <p><strong>문제</strong>: 정렬된 수열에서 연속 부분 수열의 합이 k인 구간 중 가장 짧고, 시작 인덱스가 빠른 구간 [left, right]를 구하세요.</p>
+
+            <pre><code><span class="keyword">def</span> <span class="function">solution</span>(sequence, k):
+    n = <span class="function">len</span>(sequence)
+    left, right = <span class="number">0</span>, <span class="number">0</span>
+    current_sum = sequence[<span class="number">0</span>]
+    
+    min_len = <span class="function">float</span>(<span class="string">'inf'</span>)
+    result = [<span class="number">0</span>, <span class="number">0</span>]
+    
+    <span class="keyword">while</span> left &lt;= right <span class="keyword">and</span> right &lt; n:
+        <span class="keyword">if</span> current_sum == k:
+            current_len = right - left + <span class="number">1</span>
+            <span class="keyword">if</span> current_len &lt; min_len:
+                min_len = current_len
+                result = [left, right]
+            current_sum -= sequence[left]
+            left += <span class="number">1</span>
+        <span class="keyword">elif</span> current_sum &lt; k:
+            right += <span class="number">1</span>
+            <span class="keyword">if</span> right &lt; n:
+                current_sum += sequence[right]
+        <span class="keyword">else</span>:
+            current_sum -= sequence[left]
+            left += <span class="number">1</span>
+            
+    <span class="keyword">return</span> result</code></pre>
+        </section>
+
+        <footer>
+            <p>Antigravity Python Coding Test Preparation Guide • Day 07 (Week 1 Complete! 🎉)</p>
+        </footer>
+    </div>
+</body>
+</html>
