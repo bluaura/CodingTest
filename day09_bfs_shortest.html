@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[9일차] BFS (너비 우선 탐색) & 최단 거리 알고리즘</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Noto+Sans+KR:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-color: #0f172a; --card-bg: #1e293b; --card-border: #334155; --primary: #38bdf8; --text-main: #f8fafc; --text-muted: #94a3b8; --code-bg: #0f172a; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: var(--bg-color); color: var(--text-main); line-height: 1.7; padding: 2rem 1rem; }
+        .container { max-width: 900px; margin: 0 auto; }
+        header { text-align: center; padding: 2.5rem 1.5rem; background: linear-gradient(135deg, rgba(30,41,59,0.8), rgba(15,23,42,0.9)); border: 1px solid var(--card-border); border-radius: 16px; margin-bottom: 2rem; }
+        .badge { display: inline-block; background: linear-gradient(90deg, #38bdf8, #818cf8); color: #0f172a; font-weight: 700; padding: 0.35rem 1rem; border-radius: 9999px; font-size: 0.875rem; margin-bottom: 1rem; }
+        h1 { font-size: 2rem; color: #fff; margin-bottom: 0.5rem; }
+        .card { background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 1.8rem; margin-bottom: 2rem; }
+        .card-title { font-size: 1.35rem; color: var(--primary); margin-bottom: 1.2rem; border-bottom: 2px solid rgba(56,189,248,0.2); padding-bottom: 0.6rem; }
+        pre { background-color: var(--code-bg); border: 1px solid #334155; border-radius: 10px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0; font-family: 'Fira Code', monospace; color: #f1f5f9; }
+        .keyword { color: #f472b6; } .function { color: #38bdf8; } .string { color: #34d399; } .comment { color: #64748b; }
+        footer { text-align: center; color: var(--text-muted); font-size: 0.875rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--card-border); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <span class="badge">DAY 09 • 그래프 알고리즘</span>
+            <h1>9일차: BFS (너비 우선 탐색) & 2차원 최단 거리</h1>
+            <p class="subtitle">Queue 기반의 BFS 탐색과 가중치 없는 미로 최단 경로 원리</p>
+        </header>
+
+        <section class="card">
+            <h2 class="card-title">📌 1. BFS (Breadth-First Search) 핵심 특성</h2>
+            <p>시작 노드에서 가까운 노드부터 레벨 순서대로 탐색하므로, **가중치가 동일(1)한 그래프에서 최단 경로**를 보장합니다.</p>
+            <pre><code><span class="keyword">from</span> collections <span class="keyword">import</span> deque
+
+queue = deque([(start_r, start_c)])
+dist[start_r][start_c] = <span class="number">1</span>
+
+<span class="keyword">while</span> queue:
+    r, c = queue.popleft()
+    <span class="keyword">for</span> dr, dc <span class="keyword">in</span> [(-<span class="number">1</span>,<span class="number">0</span>),(<span class="number">1</span>,<span class="number">0</span>),(<span class="number">0</span>,-<span class="number">1</span>),(<span class="number">0</span>,<span class="number">1</span>)]:
+        nr, nc = r + dr, c + dc
+        <span class="keyword">if</span> valid(nr, nc) <span class="keyword">and</span> dist[nr][nc] == <span class="number">0</span>:
+            dist[nr][nc] = dist[r][c] + <span class="number">1</span>
+            queue.append((nr, nc))</code></pre>
+        </section>
+
+        <section class="card">
+            <h2 class="card-title">📝 2. [실습 문제 9] 게임 맵 최단거리 (프로그래머스 Lv.2)</h2>
+            <pre><code><span class="keyword">def</span> <span class="function">solution</span>(maps):
+    N, M = <span class="function">len</span>(maps), <span class="function">len</span>(maps[<span class="number">0</span>])
+    dist = [[<span class="number">0</span>] * M <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(N)]
+    queue = deque([(<span class="number">0</span>, <span class="number">0</span>)])
+    dist[<span class="number">0</span>][<span class="number">0</span>] = <span class="number">1</span>
+    
+    <span class="keyword">while</span> queue:
+        r, c = queue.popleft()
+        <span class="keyword">if</span> r == N - <span class="number">1</span> <span class="keyword">and</span> c == M - <span class="number">1</span>:
+            <span class="keyword">return</span> dist[r][c]
+        <span class="keyword">for</span> dr, dc <span class="keyword">in</span> [(-<span class="number">1</span>,<span class="number">0</span>),(<span class="number">1</span>,<span class="number">0</span>),(<span class="number">0</span>,-<span class="number">1</span>),(<span class="number">0</span>,<span class="number">1</span>)]:
+            nr, nc = r + dr, c + dc
+            <span class="keyword">if</span> <span class="number">0</span> &lt;= nr &lt; N <span class="keyword">and</span> <span class="number">0</span> &lt;= nc &lt; M:
+                <span class="keyword">if</span> maps[nr][nc] == <span class="number">1</span> <span class="keyword">and</span> dist[nr][nc] == <span class="number">0</span>:
+                    dist[nr][nc] = dist[r][c] + <span class="number">1</span>
+                    queue.append((nr, nc))
+    <span class="keyword">return</span> -<span class="number">1</span></code></pre>
+        </section>
+
+        <footer><p>Antigravity Python Coding Test Guide • Day 09</p></footer>
+    </div>
+</body>
+</html>

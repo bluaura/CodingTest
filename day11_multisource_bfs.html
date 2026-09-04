@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[11일차] 다중 시작점 BFS (Multi-source BFS)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Noto+Sans+KR:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-color: #0f172a; --card-bg: #1e293b; --card-border: #334155; --primary: #38bdf8; --text-main: #f8fafc; --text-muted: #94a3b8; --code-bg: #0f172a; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: var(--bg-color); color: var(--text-main); line-height: 1.7; padding: 2rem 1rem; }
+        .container { max-width: 900px; margin: 0 auto; }
+        header { text-align: center; padding: 2.5rem 1.5rem; background: linear-gradient(135deg, rgba(30,41,59,0.8), rgba(15,23,42,0.9)); border: 1px solid var(--card-border); border-radius: 16px; margin-bottom: 2rem; }
+        .badge { display: inline-block; background: linear-gradient(90deg, #f59e0b, #38bdf8); color: #0f172a; font-weight: 700; padding: 0.35rem 1rem; border-radius: 9999px; font-size: 0.875rem; margin-bottom: 1rem; }
+        h1 { font-size: 2rem; color: #fff; margin-bottom: 0.5rem; }
+        .card { background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 1.8rem; margin-bottom: 2rem; }
+        .card-title { font-size: 1.35rem; color: var(--primary); margin-bottom: 1.2rem; border-bottom: 2px solid rgba(56,189,248,0.2); padding-bottom: 0.6rem; }
+        pre { background-color: var(--code-bg); border: 1px solid #334155; border-radius: 10px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0; font-family: 'Fira Code', monospace; color: #f1f5f9; }
+        .keyword { color: #f472b6; } .function { color: #38bdf8; } .string { color: #34d399; } .comment { color: #64748b; }
+        footer { text-align: center; color: var(--text-muted); font-size: 0.875rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--card-border); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <span class="badge">DAY 11 • 그래프 알고리즘</span>
+            <h1>11일차: 다중 시작점 BFS (Multi-source BFS)</h1>
+            <p class="subtitle">시점 0에 모든 출발점을 큐에 동시에 삽입하여 전파 시뮬레이션하는 기법</p>
+        </header>
+
+        <section class="card">
+            <h2 class="card-title">📌 1. 다중 시작점 BFS 템플릿</h2>
+            <pre><code><span class="keyword">from</span> collections <span class="keyword">import</span> deque
+
+queue = deque()
+<span class="comment"># 1. 모든 시작점을 큐에 동시에 넣음</span>
+<span class="keyword">for</span> r <span class="keyword">in</span> <span class="function">range</span>(N):
+    <span class="keyword">for</span> c <span class="keyword">in</span> <span class="function">range</span>(M):
+        <span class="keyword">if</span> grid[r][c] == <span class="number">1</span>:
+            queue.append((r, c))
+
+<span class="comment"># 2. 동시 전파 BFS</span>
+<span class="keyword">while</span> queue:
+    r, c = queue.popleft()
+    <span class="keyword">for</span> dr, dc <span class="keyword">in</span> [(-<span class="number">1</span>,<span class="number">0</span>),(<span class="number">1</span>,<span class="number">0</span>),(<span class="number">0</span>,-<span class="number">1</span>),(<span class="number">0</span>,<span class="number">1</span>)]:
+        nr, nc = r + dr, c + dc
+        <span class="keyword">if</span> <span class="number">0</span> &lt;= nr &lt; N <span class="keyword">and</span> <span class="number">0</span> &lt;= nc &lt; M <span class="keyword">and</span> grid[nr][nc] == <span class="number">0</span>:
+            grid[nr][nc] = grid[r][c] + <span class="number">1</span>
+            queue.append((nr, nc))</code></pre>
+        </section>
+
+        <footer><p>Antigravity Python Coding Test Guide • Day 11</p></footer>
+    </div>
+</body>
+</html>
